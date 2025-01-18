@@ -1,0 +1,7 @@
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\InstantMessaging\bin\Debug\InstantMessaging.exe.config
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\InstantMessaging\bin\Debug\InstantMessaging.exe
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\InstantMessaging\bin\Debug\InstantMessaging.pdb
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\InstantMessaging\obj\Debug\InstantMessaging.csproj.AssemblyReference.cache
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\InstantMessaging\obj\Debug\InstantMessaging.csproj.CoreCompileInputs.cache
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\InstantMessaging\obj\Debug\InstantMessaging.exe
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\InstantMessaging\obj\Debug\InstantMessaging.pdb

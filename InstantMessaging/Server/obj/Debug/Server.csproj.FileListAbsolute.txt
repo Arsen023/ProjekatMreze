@@ -1,0 +1,7 @@
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Server\bin\Debug\Server.exe.config
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Server\bin\Debug\Server.exe
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Server\bin\Debug\Server.pdb
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Server\obj\Debug\Server.csproj.AssemblyReference.cache
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Server\obj\Debug\Server.exe
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Server\obj\Debug\Server.pdb

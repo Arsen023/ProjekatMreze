@@ -10,7 +10,7 @@ namespace InstantMessaging
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Provera!!");
+            
         }
     }
 }
