@@ -14,6 +14,7 @@ namespace Server
         public Kanal(string naziv) 
         { 
             NazivKanala = naziv;
+            PorukaList = new List<Poruka>();
         }
 
         //dodavanje poruke u kanal

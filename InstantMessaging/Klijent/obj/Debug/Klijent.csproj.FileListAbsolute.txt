@@ -1,0 +1,7 @@
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Klijent\bin\Debug\Klijent.exe.config
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Klijent\bin\Debug\Klijent.exe
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Klijent\bin\Debug\Klijent.pdb
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Klijent\obj\Debug\Klijent.csproj.AssemblyReference.cache
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Klijent\obj\Debug\Klijent.csproj.CoreCompileInputs.cache
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Klijent\obj\Debug\Klijent.exe
+C:\Users\David\source\repos\ProjekatMreze\InstantMessaging\Klijent\obj\Debug\Klijent.pdb
