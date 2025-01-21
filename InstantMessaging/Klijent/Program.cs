@@ -11,6 +11,7 @@ namespace Klijent
     {
         static string listaServeraPutanja = "lista_servera.txt";
         static string izabraniServer = ""; // Držanje trenutnog izabranog servera
+        static string izabraniKanal = ""; // Držanje izabranog kanala
 
         public static void Main(string[] args)
         {
@@ -55,26 +56,49 @@ namespace Klijent
             izabraniServer = serveri[izbor];
             Console.WriteLine($"Povezivanje na server: {izabraniServer}");
 
-            // Čuvanje izabranog servera u fajlu za kasnije
-            SpremiServer(izabraniServer);
+            // Dobavi listu kanala za izabrani server
+            List<string> kanali = DobaviKanale(izabraniServer);
 
-            // Omogućiti korisniku da pošalje PRIJAVU kada poželi
-            bool prijavaPoslana = false;
-            while (!prijavaPoslana)
+            if (kanali.Count == 0)
             {
-                Console.WriteLine("\nPritisnite 'P' za prijavu na server.");
-                string unos = Console.ReadLine().ToUpper();
+                Console.WriteLine("Server nema dostupnih kanala.");
+                return;
+            }
 
-                if (unos == "P")
+            // Prikazivanje liste kanala korisniku
+            Console.WriteLine("Dostupni kanali: ");
+            for (int i = 0; i < kanali.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {kanali[i]}");
+            }
+
+            // Korisnik bira kanal
+            Console.WriteLine("Izaberite kanal za slanje poruke:");
+            int kanalIzbor = int.Parse(Console.ReadLine()) - 1;
+
+            if (kanalIzbor < 0 || kanalIzbor >= kanali.Count)
+            {
+                Console.WriteLine("Nevalidan izbor.");
+                return;
+            }
+
+            izabraniKanal = kanali[kanalIzbor];
+            Console.WriteLine($"Izabrali ste kanal: {izabraniKanal}");
+
+            // Omogućiti korisniku da pošalje poruku
+            while (true)
+            {
+                Console.WriteLine("Unesite poruku koju želite da pošaljete:");
+                string poruka = Console.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(poruka))
                 {
-                    // Povezivanje putem UDP-a za prijavu
-                    UdpPrijava(korisnickoIme, izabraniServer);
-                    prijavaPoslana = true;
+                    Console.WriteLine("Poruka ne može biti prazna. Pokušajte ponovo.");
+                    continue;
                 }
-                else
-                {
-                    Console.WriteLine("Pogrešan unos. Pritisnite 'P' za prijavu.");
-                }
+
+                // Pošaljite poruku na server
+                PosaljitePoruku(poruka, korisnickoIme);
             }
         }
 
@@ -109,44 +133,39 @@ namespace Klijent
             return serveri;
         }
 
-        private static void SpremiServer(string server)
+        private static List<string> DobaviKanale(string server)
         {
-            try
-            {
-                File.WriteAllText(listaServeraPutanja, server);
-                Console.WriteLine("Server je sačuvan za buduće povezivanje.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Greška pri čuvanju servera: {ex.Message}");
-            }
+            List<string> kanali = new List<string>();
+            // Ovaj metod bi trebalo da komunicira sa serverom da bi dobio listu kanala
+            // Na primer, može slati UDP zahtev serveru i dobiti listu kanala za izabrani server.
+            // Trenutno simuliramo fiksnu listu kanala.
+            kanali.Add("General");
+            kanali.Add("Help");
+            kanali.Add("Off-topic");
+            return kanali;
         }
 
-        private static void UdpPrijava(string korisnickoIme, string izabraniServer)
+        private static void PosaljitePoruku(string poruka, string korisnickoIme)
         {
             try
             {
                 using (UdpClient udpClient = new UdpClient())
                 {
-                    IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000); // Pretpostavljamo da server koristi lokalni IP i port 5000
+                    IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000); // Lokacija servera
 
-                    // Korisnik šalje prijavu na server
-                    string prijavaPoruka = $"PRIJAVA {korisnickoIme}";
-                    byte[] prijavaBytes = Encoding.UTF8.GetBytes(prijavaPoruka);
-                    udpClient.Send(prijavaBytes, prijavaBytes.Length, serverEndPoint);
+                    // Dodavanje trenutnog datuma i vremena u format: yyyy-MM-dd HH:mm:ss
+                    string datumVreme = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-                    // Primanje odgovora sa TCP informacijama
-                    IPEndPoint remoteEndPoint = null;
-                    byte[] tcpInfoBytes = udpClient.Receive(ref remoteEndPoint);
-                    string tcpInfo = Encoding.UTF8.GetString(tcpInfoBytes);
-
-                    Console.WriteLine($"TCP Informacije: {tcpInfo}");
-                    // Dalje se povezuje putem TCP protokola koristeći tcpInfo
+                    // Formiranje poruke u traženom formatu
+                    string porukaZaServer = $"[{datumVreme}]-[{izabraniServer}]:[{izabraniKanal}]:[{poruka}]-[{korisnickoIme}]";
+                    byte[] porukaBytes = Encoding.UTF8.GetBytes(porukaZaServer);
+                    udpClient.Send(porukaBytes, porukaBytes.Length, serverEndPoint);
+                    Console.WriteLine("Poruka poslata.");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Greška pri prijavi: {ex.Message}");
+                Console.WriteLine($"Greška pri slanju poruke: {ex.Message}");
             }
         }
     }

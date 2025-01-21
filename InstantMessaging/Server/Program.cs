@@ -133,6 +133,26 @@ namespace Server
                         udpServer.Send(tcpInfoBytes, tcpInfoBytes.Length, clientEndPoint);
                         Console.WriteLine($"Poslata TCP informacija za prijavu: {tcpInfo}");
                     }
+
+                    // Provera za slanje poruka na kanal
+                    if (porukaTekst.StartsWith("PORUKA"))
+                    {
+                        string[] delovi = porukaTekst.Split(';');
+                        string serverNaziv = delovi[1];
+                        string kanalNaziv = delovi[2];
+                        string poruka2 = delovi[3];
+
+                        if (serveri.ContainsKey(serverNaziv))
+                        {
+                            var kanal = serveri[serverNaziv].Find(k => k.NazivKanala == kanalNaziv);
+                            if (kanal != null)
+                            {
+                                kanal.DodajPoruku(poruka2);
+                                string datumVreme = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                                Console.WriteLine($"[{datumVreme}] - [{serverNaziv}]: [{kanalNaziv}]: [{poruka}]");
+                            }
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
