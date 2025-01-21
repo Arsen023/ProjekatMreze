@@ -10,138 +10,142 @@ namespace Server
 {
     public class Program
     {
-        // Lista servera koja će biti poslana klijentima
-        static List<string> listaServera = new List<string>()
-        {
-            "127.0.0.1:12345",  // Server sa TCP portom 12345
-            "127.0.0.1:12347",  // Server sa TCP portom 12347
-            "127.0.0.1:12348"   // Server sa TCP portom 12348
-        };
+        static Dictionary<string, List<Kanal>> serveri = new Dictionary<string, List<Kanal>>();
+        static UdpClient udpServer = new UdpClient(5000);  // Globalni UDP server
 
         static void Main(string[] args)
         {
-            // Prijava na server preko UDP
-            UdpClient udpserver = new UdpClient(12347);  // UDP port na kojem server čeka prijavu
-            Dictionary<string, List<Kanal>> serveri = new Dictionary<string, List<Kanal>>();
-            List<int> portovi = new List<int> { 12345, 12347, 12348 };
+            Console.WriteLine("Pokretanje aplikacije za upravljanje serverima...");
+            // Pokreni asinhronu metodu koja osluškuje UDP zahteve
+            Task.Run(() => OsluskivanjeZahtjeva());
 
-            // Pokretanje servera na više portova
-            foreach (int port in portovi)
-            {
-                int localPort = port;
-                // Pokreći novi zadatak za svaki port (server)
-                Task.Run(() => pokreniServer(localPort, serveri));
-            }
-
-            Console.WriteLine("************************************************\n");
-            Console.WriteLine("Server je pokrenut i čeka na prijavu korisnika...\n");
-
-            // Petlja za primanje poruka (prijava) od klijenata
             while (true)
             {
-                // Dobijanje podataka od klijenta putem UDP
-                IPEndPoint udpEndPoint = new IPEndPoint(IPAddress.Any, 12347);
-                byte[] data = udpserver.Receive(ref udpEndPoint);
-                string prijavaPoruka = Encoding.UTF8.GetString(data);
-                Console.WriteLine($"Primljena poruka od {udpEndPoint}: {prijavaPoruka}\n");
+                Console.WriteLine("\nOpcije: ");
+                Console.WriteLine("1 - Kreiraj novi server");
+                Console.WriteLine("2 - Dodaj kanal na postojeci server");
+                Console.WriteLine("3 - Prikazi stanje servera");
 
-                // Ako je poruka "PRIJAVA", server šalje listu servera
-                if (prijavaPoruka.ToUpper() == "PRIJAVA")
+                string izbor = Console.ReadLine();
+
+                switch (izbor)
                 {
-                    string odgovor = "Prijava uspesna. Dobijate TCP konekciju. Lista servera: ";
-                    odgovor += string.Join(";", listaServera);
-
-                    byte[] odgovorData = Encoding.UTF8.GetBytes(odgovor);
-                    udpserver.Send(odgovorData, odgovorData.Length, udpEndPoint);
-                    Console.WriteLine("Lista servera poslata klijentu.");
+                    case "1":
+                        KreirajServer();
+                        break;
+                    case "2":
+                        DodajKanal();
+                        break;
+                    case "3":
+                        PrikaziStanjeServera();
+                        break;
+                    case "0":
+                        ZatvoriServer();
+                        return;
+                    default:
+                        Console.WriteLine("Nepoznata opcija. Pokusajte ponovo");
+                        break;
                 }
             }
         }
 
-        static void pokreniServer(int port, Dictionary<string, List<Kanal>> serveri)
+        static void KreirajServer()
         {
-            // Povezivanje na TCP server pomoću Sockets (uticnice)
-            Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), port));  // Bind na TCP port
-            serverSocket.Listen(10);  // Čeka maksimalno 10 konekcija
+            Console.WriteLine("Unesite naziv novog servera: ");
+            string nazivServera = Console.ReadLine();
 
-            Console.WriteLine($"TCP server je pokrenut i čeka na konekcije na portu {port}...");
-
-            // Petlja za prihvatanje klijenata
-            while (true)
+            if (serveri.ContainsKey(nazivServera))
             {
-                Socket clientSocket = serverSocket.Accept();  // Prihvata konekciju od klijenta
-                Console.WriteLine("Klijent se povezao na server.");
+                Console.WriteLine($"Server sa nazivom '{nazivServera}' vec postoji.");
+                return;
+            }
 
-                // Komunikacija sa klijentom preko TCP socket-a
-                byte[] welcomeMessage = Encoding.UTF8.GetBytes("Dobrodošli na server!");
-                clientSocket.Send(welcomeMessage);
+            serveri[nazivServera] = new List<Kanal>();
+            Console.WriteLine($"Server '{nazivServera}' uspesno kreiran.");
+        }
 
-                // Kreiranje novih servera i kanala
-                Console.WriteLine("----------KREIRANJE NOVOG SERVERA-----------");
-                Console.WriteLine("Unesite IP adresu i port novog servera u formatu '127.0.0.1:12345': ");
-                string unosServera = Console.ReadLine();
+        static void DodajKanal()
+        {
+            Console.WriteLine("Unesite naziv servera na kome zelite da dodajete kanale: ");
+            string nazivServera = Console.ReadLine();
 
-                // Definisanje varijable za server adresu
-                string serverAdresa = string.Empty;
+            if (!serveri.ContainsKey(nazivServera))
+            {
+                Console.WriteLine($"Server '{nazivServera}' ne postoji.");
+                return;
+            }
+            Console.WriteLine("Unesite naziv novog kanala: ");
+            string nazivKanala = Console.ReadLine();
 
-                // Parsiranje unosa
-                string[] delovi = unosServera.Split(':');
-                if (delovi.Length == 2)
+            serveri[nazivServera].Add(new Kanal(nazivKanala));
+            Console.WriteLine($"Kanal '{nazivKanala}' uspesno dodat na server '{nazivServera}'.");
+        }
+
+        static void PrikaziStanjeServera()
+        {
+            if (serveri.Count == 0)
+            {
+                Console.WriteLine("Nema definisanih servera.");
+                return;
+            }
+
+            foreach (var server in serveri)
+            {
+                Console.WriteLine($"Server: {server.Key}");
+                if (server.Value.Count == 0)
                 {
-                    string ip = delovi[0];
-                    string portStr = delovi[1];
-
-                    if (int.TryParse(portStr, out int portNovo))
-                    {
-                        serverAdresa = $"{ip}:{portNovo}";
-
-                        // Dodavanje servera u listu servera ako nije već prisutan
-                        if (!listaServera.Contains(serverAdresa))
-                        {
-                            listaServera.Add(serverAdresa);
-                            Console.WriteLine($"Server '{serverAdresa}' je uspešno dodat u listu servera.");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Server '{serverAdresa}' već postoji.");
-                        }
-
-                        // Dodaj server u dictionary ako ne postoji
-                        if (!serveri.ContainsKey(serverAdresa))
-                        {
-                            serveri[serverAdresa] = new List<Kanal>();
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Nep validan port.");
-                    }
+                    Console.WriteLine(" - Nema kanala.");
                 }
                 else
                 {
-                    Console.WriteLine("Format unosa nije ispravan. Unesite IP adresu i port u formatu '127.0.0.1:12345'.");
+                    foreach (Kanal kanal in server.Value)
+                    {
+                        Console.WriteLine($" - Kanal: {kanal.NazivKanala} (Broj poruka: {kanal.PorukaList.Count})");
+                    }
                 }
-
-                if (string.IsNullOrEmpty(serverAdresa)) continue;
-
-                // Kreiranje novog kanala
-                Console.WriteLine("Unesite naziv kanala koji želite da kreirate:");
-                string kanalNaziv = Console.ReadLine();
-                Console.WriteLine("Naziv kanala je: " + kanalNaziv); // Debug poruka
-                Kanal noviKanal = new Kanal(kanalNaziv);
-                serveri[serverAdresa].Add(noviKanal);
-                Console.WriteLine($"Kanal '{kanalNaziv}' je uspešno kreiran na serveru '{serverAdresa}'.");
-
-                // Dodavanje poruke u kanal
-                Console.WriteLine("Unesite sadržaj poruke: ");
-                string sadrzajPoruke = Console.ReadLine();
-                Poruka novaPoruka = new Poruka("Korisnik", DateTime.Now.ToString(), sadrzajPoruke);
-                noviKanal.DodajPoruku(novaPoruka);
-                Console.WriteLine("Poruka je dodata u kanal");
-
-                clientSocket.Close();  // Zatvaramo konekciju sa klijentom
             }
+        }
+
+        static void OsluskivanjeZahtjeva()
+        {
+            IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 5000);
+
+            while (true)
+            {
+                try
+                {
+                    byte[] poruka = udpServer.Receive(ref clientEndPoint);
+                    string porukaTekst = Encoding.UTF8.GetString(poruka);
+                    Console.WriteLine($"Primljena poruka: {porukaTekst}");
+
+                    if (porukaTekst == "LISTA_SERVERA")
+                    {
+                        string listaServera = string.Join(";", serveri.Keys);
+                        byte[] listaBytes = Encoding.UTF8.GetBytes(listaServera);
+                        udpServer.Send(listaBytes, listaBytes.Length, clientEndPoint);
+                        Console.WriteLine("Poslata lista servera.");
+                    }
+
+                    if (porukaTekst.StartsWith("PRIJAVA"))
+                    {
+                        string tcpInfo = $"{clientEndPoint.Address.ToString()}:6000";
+                        byte[] tcpInfoBytes = Encoding.UTF8.GetBytes(tcpInfo);
+                        udpServer.Send(tcpInfoBytes, tcpInfoBytes.Length, clientEndPoint);
+                        Console.WriteLine($"Poslata TCP informacija za prijavu: {tcpInfo}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Greška prilikom osluškivanja UDP poruka: {ex.Message}");
+                }
+            }
+        }
+
+        static void ZatvoriServer()
+        {
+            Console.WriteLine("Zatvaranje servera...");
+            udpServer.Close();
+            Console.WriteLine("Server je zatvoren.");
         }
     }
 }
