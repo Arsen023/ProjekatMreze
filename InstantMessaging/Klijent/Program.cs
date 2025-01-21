@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
+//LAOAAj
 namespace Klijent
 {
     public class Program
