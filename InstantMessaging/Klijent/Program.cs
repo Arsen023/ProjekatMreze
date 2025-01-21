@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.IO;
 
 namespace Klijent
 {
     public class Program
     {
-        static string listaServeraPutanja = "lista_servera.txt";
         static string izabraniServer = ""; // Držanje trenutnog izabranog servera
         static string izabraniKanal = ""; // Držanje izabranog kanala
 
@@ -27,7 +25,26 @@ namespace Klijent
                 return;
             }
 
-            // Pokreni UDP vezu i primi listu servera
+            // Korisnik mora uneti "PRIJAVA" kako bi nastavio dalje
+            while (true)
+            {
+                Console.WriteLine("Unesite 'PRIJAVA' za nastavak:");
+                string unos = Console.ReadLine();
+
+                if (unos.Equals("PRIJAVA", StringComparison.OrdinalIgnoreCase))
+                {
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Nevažeća komanda. Pokušajte ponovo.");
+                }
+            }
+
+            // Prijavite se na server
+            PrijaviSeNaServer(korisnickoIme);
+
+            // Dalji proces se nastavlja sa dobijanjem liste servera
             List<string> serveri = DobaviListuServera();
 
             if (serveri.Count == 0)
@@ -44,7 +61,7 @@ namespace Klijent
             }
 
             // Korisnik bira server
-            Console.WriteLine("Izaberite server za povezivanje(unesite broj):");
+            Console.WriteLine("Izaberite server za povezivanje (unesite broj):");
             int izbor = int.Parse(Console.ReadLine()) - 1;
 
             if (izbor < 0 || izbor >= serveri.Count)
@@ -102,6 +119,31 @@ namespace Klijent
             }
         }
 
+        private static void PrijaviSeNaServer(string korisnickoIme)
+        {
+            try
+            {
+                using (UdpClient udpClient = new UdpClient())
+                {
+                    IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000);
+
+                    // Slanje PRIJAVA poruke
+                    string poruka = "PRIJAVA " + korisnickoIme;
+                    byte[] porukaBytes = Encoding.UTF8.GetBytes(poruka);
+                    udpClient.Send(porukaBytes, porukaBytes.Length, serverEndPoint);
+
+                    // Prijem odgovora od servera
+                    byte[] odgovorBytes = udpClient.Receive(ref serverEndPoint);
+                    string odgovor = Encoding.UTF8.GetString(odgovorBytes);
+                    Console.WriteLine("Server odgovorio: " + odgovor);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Greška pri prijavi: {ex.Message}");
+            }
+        }
+
         private static List<string> DobaviListuServera()
         {
             List<string> serveri = new List<string>();
@@ -109,7 +151,7 @@ namespace Klijent
             {
                 using (UdpClient udpClient = new UdpClient())
                 {
-                    IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000); // Pretpostavljamo da server koristi lokalni IP i port 5000
+                    IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000); // Pretpostavljeni UDP port 5000
 
                     // Slanje poruke za dobijanje liste servera
                     string poruka = "LISTA_SERVERA";
@@ -137,8 +179,6 @@ namespace Klijent
         {
             List<string> kanali = new List<string>();
             // Ovaj metod bi trebalo da komunicira sa serverom da bi dobio listu kanala
-            // Na primer, može slati UDP zahtev serveru i dobiti listu kanala za izabrani server.
-            // Trenutno simuliramo fiksnu listu kanala.
             kanali.Add("General");
             kanali.Add("Help");
             kanali.Add("Off-topic");
