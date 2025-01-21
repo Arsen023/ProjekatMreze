@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -153,6 +154,34 @@ namespace Server
                             }
                         }
                     }
+
+                    if (porukaTekst.StartsWith("LISTA_KANALA"))
+                    {
+                        string[] delovi = porukaTekst.Split(';');
+                        if (delovi.Length < 2)
+                        {
+                            Console.WriteLine("Neispravan format zahteva za listu kanala.");
+                            continue;
+                        }
+
+                        string serverNaziv = delovi[1];
+
+                        if (serveri.ContainsKey(serverNaziv))
+                        {
+                            List<Kanal> kanali = serveri[serverNaziv];
+                            string listaKanala = string.Join(";", kanali.Select(k => k.NazivKanala));
+                            byte[] listaBytes = Encoding.UTF8.GetBytes(listaKanala);
+                            udpServer.Send(listaBytes, listaBytes.Length, clientEndPoint);
+                            Console.WriteLine($"Poslata lista kanala za server {serverNaziv}: {listaKanala}");
+                        }
+                        else
+                        {
+                            byte[] errorBytes = Encoding.UTF8.GetBytes("GRESKA: Server ne postoji.");
+                            udpServer.Send(errorBytes, errorBytes.Length, clientEndPoint);
+                            Console.WriteLine($"Klijent trazio kanale za nepostojeći server: {serverNaziv}");
+                        }
+                    }
+
                 }
                 catch (Exception ex)
                 {

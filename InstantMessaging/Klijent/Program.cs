@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-//PERICE
+
 namespace Klijent
 {
     public class Program
@@ -179,12 +179,41 @@ namespace Klijent
         private static List<string> DobaviKanale(string server)
         {
             List<string> kanali = new List<string>();
-            // Ovaj metod bi trebalo da komunicira sa serverom da bi dobio listu kanala
-            kanali.Add("General");
-            kanali.Add("Help");
-            kanali.Add("Off-topic");
+
+            try
+            {
+                using (UdpClient udpClient = new UdpClient())
+                {
+                    IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000);
+
+                    // Slanje zahteva za listu kanala
+                    string poruka = $"LISTA_KANALA;{server}";
+                    byte[] porukaBytes = Encoding.UTF8.GetBytes(poruka);
+                    udpClient.Send(porukaBytes, porukaBytes.Length, serverEndPoint);
+
+                    // Prijem odgovora od servera
+                    IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                    byte[] odgovorBytes = udpClient.Receive(ref remoteEndPoint);
+                    string odgovor = Encoding.UTF8.GetString(odgovorBytes);
+
+                    if (odgovor.StartsWith("GRESKA"))
+                    {
+                        Console.WriteLine($"Greška: {odgovor}");
+                    }
+                    else
+                    {
+                        kanali.AddRange(odgovor.Split(';'));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Greška pri dobavljanju kanala: {ex.Message}");
+            }
+
             return kanali;
         }
+
 
         private static void PosaljitePoruku(string poruka, string korisnickoIme)
         {
