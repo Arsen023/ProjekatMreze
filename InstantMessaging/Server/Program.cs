@@ -18,7 +18,7 @@ namespace Server
         {
             Console.WriteLine("Pokretanje aplikacije za upravljanje serverima...");
             // Pokreni asinhronu metodu koja osluškuje UDP zahteve
-            Task.Run(() => OsluskivanjeZahtjeva());
+            Task.Run(() => OsluskivanjeZahteva());
 
             while (true)
             {
@@ -107,7 +107,7 @@ namespace Server
             }
         }
 
-        static void OsluskivanjeZahtjeva()
+        static void OsluskivanjeZahteva()
         {
             IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 5000);
 
@@ -198,3 +198,6 @@ namespace Server
         }
     }
 }
+
+
+
