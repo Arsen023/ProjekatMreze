@@ -9,7 +9,7 @@ namespace Server
 {
     public class UdpServer
     {
-        // Definiši servere kao statičku promenljivu
+        
         static Dictionary<string, List<Kanal>> serveri = new Dictionary<string, List<Kanal>>();
 
         public static void PokreniUdpServer()
@@ -51,7 +51,7 @@ namespace Server
                     listaServera.AppendLine($"{server.Key}:6000"); // Format: serverNaziv:port
                 }
 
-                // Pošaljite servere
+                
                 byte[] porukaBytes = Encoding.UTF8.GetBytes(listaServera.ToString());
                 udpClient.Send(porukaBytes, porukaBytes.Length, clientEndPoint);
                 Console.WriteLine("Lista servera poslata klijentima.");

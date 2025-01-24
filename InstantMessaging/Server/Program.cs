@@ -17,7 +17,7 @@ namespace Server
         static void Main(string[] args)
         {
             Console.WriteLine("Pokretanje aplikacije za upravljanje serverima...");
-            // Pokreni asinhronu metodu koja osluškuje UDP zahteve
+          
             Task.Run(() => OsluskivanjeZahteva());
 
             while (true)
@@ -26,7 +26,7 @@ namespace Server
                 Console.WriteLine("1 - Kreiraj novi server");
                 Console.WriteLine("2 - Dodaj kanal na postojeci server");
                 Console.WriteLine("3 - Prikazi stanje servera");
-
+                Console.WriteLine("0 - Zatvori server");
                 string izbor = Console.ReadLine();
 
                 switch (izbor)
@@ -198,6 +198,5 @@ namespace Server
         }
     }
 }
-
 
 
