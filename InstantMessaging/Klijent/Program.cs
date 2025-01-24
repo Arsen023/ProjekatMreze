@@ -71,15 +71,21 @@ namespace Klijent
                 Console.WriteLine($"{i + 1}. {serveri[i]}");
             }
 
-            Console.WriteLine("Izaberite server (unesite broj):");
-            if (int.TryParse(Console.ReadLine(), out int izbor) && izbor > 0 && izbor <= serveri.Count)
+            bool validanIzbor = false;
+            while (!validanIzbor)
             {
-                izabraniServer = serveri[izbor - 1];
-                return true;
+                Console.WriteLine("Izaberite server (unesite broj):");
+                if (int.TryParse(Console.ReadLine(), out int izbor) && izbor > 0 && izbor <= serveri.Count)
+                {
+                    izabraniServer = serveri[izbor - 1];
+                    validanIzbor = true;
+                }
+                else
+                {
+                    Console.WriteLine("Nevažeći izbor. Pokušajte ponovo.");
+                }
             }
-
-            Console.WriteLine("Nevažeći izbor.");
-            return false;
+            return true;
         }
 
         private static bool OdabirKanala()
@@ -97,15 +103,21 @@ namespace Klijent
                 Console.WriteLine($"{i + 1}. {kanali[i]}");
             }
 
-            Console.WriteLine("Izaberite kanal (unesite broj):");
-            if (int.TryParse(Console.ReadLine(), out int izbor) && izbor > 0 && izbor <= kanali.Count)
+            bool validanIzbor = false;
+            while (!validanIzbor)
             {
-                izabraniKanal = kanali[izbor - 1];
-                return true;
+                Console.WriteLine("Izaberite kanal (unesite broj):");
+                if (int.TryParse(Console.ReadLine(), out int izbor) && izbor > 0 && izbor <= kanali.Count)
+                {
+                    izabraniKanal = kanali[izbor - 1];
+                    validanIzbor = true;
+                }
+                else
+                {
+                    Console.WriteLine("Nevažeći izbor. Pokušajte ponovo.");
+                }
             }
-
-            Console.WriteLine("Nevažeći izbor.");
-            return false;
+            return true;
         }
 
         private static void Komunikacija(string korisnickoIme)

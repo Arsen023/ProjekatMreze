@@ -13,12 +13,16 @@ namespace Server
     {
         static Dictionary<string, List<Kanal>> serveri = new Dictionary<string, List<Kanal>>();
         static UdpClient udpServer = new UdpClient(5000);  // Globalni UDP server
+        static List<Socket> activeSockets = new List<Socket>(); // TCP Sockets za povezivanje sa klijentima
 
         static void Main(string[] args)
         {
             Console.WriteLine("Pokretanje aplikacije za upravljanje serverima...");
-          
+            // Pokreni asinhronu metodu koja osluškuje UDP zahteve
             Task.Run(() => OsluskivanjeZahteva());
+
+            // Pokreni TCP server za povezivanje sa klijentima
+            Task.Run(() => OsluskivanjeTCPKlijenata());
 
             while (true)
             {
@@ -101,7 +105,7 @@ namespace Server
                 {
                     foreach (Kanal kanal in server.Value)
                     {
-                        Console.WriteLine($" - Kanal: {kanal.NazivKanala} (Broj poruka: {kanal.PorukaList.Count})");
+                        Console.WriteLine($" - Kanal: {kanal.NazivKanala}");
                     }
                 }
             }
@@ -150,7 +154,8 @@ namespace Server
                             {
                                 kanal.DodajPoruku(poruka2);
                                 string datumVreme = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                                Console.WriteLine($"[{datumVreme}] - [{serverNaziv}]: [{kanalNaziv}]: [{poruka}]");
+                                Console.WriteLine($"[{datumVreme}] - [{serverNaziv}]: [{kanalNaziv}]: [{poruka2}]");
+
                             }
                         }
                     }
@@ -190,6 +195,55 @@ namespace Server
             }
         }
 
+        static void OsluskivanjeTCPKlijenata()
+        {
+            // TCP Server koji prihvata klijente
+            TcpListener tcpListener = new TcpListener(IPAddress.Any, 6000);
+            tcpListener.Start();
+            Console.WriteLine("TCP server osluškuje na portu 6000...");
+
+            while (true)
+            {
+                try
+                {
+                    Socket tcpSocket = tcpListener.AcceptSocket();
+                    activeSockets.Add(tcpSocket);
+                    Console.WriteLine($"Nov klijent se povezao preko TCP: {tcpSocket.RemoteEndPoint}");
+
+                    // Za svakog klijenta pokreni zasebnu nit za obradu komunikacije
+                    Task.Run(() => HandleTcpClient(tcpSocket));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Greška prilikom prihvatanja TCP klijenta: {ex.Message}");
+                }
+            }
+        }
+
+        static void HandleTcpClient(Socket tcpSocket)
+        {
+            try
+            {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = tcpSocket.Receive(buffer)) > 0)
+                {
+                    string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    Console.WriteLine($"Primljena TCP poruka: {message}");
+
+                    
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Greška u komunikaciji sa TCP klijentom: {ex.Message}");
+            }
+            finally
+            {
+                tcpSocket.Close();
+            }
+        }
+
         static void ZatvoriServer()
         {
             Console.WriteLine("Zatvaranje servera...");
@@ -198,5 +252,3 @@ namespace Server
         }
     }
 }
-
-

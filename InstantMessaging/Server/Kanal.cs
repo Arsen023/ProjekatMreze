@@ -10,6 +10,7 @@ namespace Server
     {
         public string NazivKanala { get; set; }
         public List<string> PorukaList { get; set; }
+        
 
         public Kanal(string naziv) 
         { 
