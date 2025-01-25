@@ -228,12 +228,21 @@ namespace Klijent
         {
             try
             {
+                // Kombinovanje korisničkog imena i kanala za ključnu reč
+                string key = korisnickoIme + izabraniKanal;
+
+                // Kreiranje Playfair objekta
+                Plejfer playfair = new Plejfer(key);
+
+                // Šifrovanje poruke
+                string encryptedMessage = playfair.Encrypt(poruka);
+
                 using (UdpClient udpClient = new UdpClient())
                 {
                     IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000);
 
                     string datumVreme = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                    string porukaZaServer = $"[{datumVreme}] - Server: {izabraniServer} - Kanal: {izabraniKanal} - Poruka: {poruka} - Korisnik: {korisnickoIme}";
+                    string porukaZaServer = $"[{datumVreme}] - Server: {izabraniServer} - Kanal: {izabraniKanal} - Poruka: {encryptedMessage} - Korisnik: {korisnickoIme}";
 
                     byte[] porukaBytes = Encoding.UTF8.GetBytes(porukaZaServer);
                     udpClient.Send(porukaBytes, porukaBytes.Length, serverEndPoint);

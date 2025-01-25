@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+
 namespace Server
 {
     public class Program
@@ -147,15 +148,25 @@ namespace Server
                         string kanalNaziv = delovi[2].Replace("[", "").Replace("]", "");
                         string poruka2 = delovi[3].Replace("[", "").Replace("]", "");
 
+                        string korisnickoIme = delovi[0].Replace("[", "").Replace("]", "");
+
+                        // Kombinovanje korisničkog imena i kanala za ključnu reč
+                        string key = korisnickoIme + kanalNaziv;
+
+                        // Kreiranje Playfair objekta
+                        Plejfer playfair = new Plejfer(key);
+
+                        // Dešifrovanje poruke
+                        string decryptedMessage = playfair.Decrypt(poruka2);
+
                         if (serveri.ContainsKey(serverNaziv))
                         {
                             var kanal = serveri[serverNaziv].Find(k => k.NazivKanala == kanalNaziv);
                             if (kanal != null)
                             {
-                                kanal.DodajPoruku(poruka2);
+                                kanal.DodajPoruku(decryptedMessage);
                                 string datumVreme = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                                Console.WriteLine($"{datumVreme} - {serverNaziv}: {kanalNaziv}: {poruka2}");
-
+                                Console.WriteLine($"{datumVreme} - {serverNaziv}: {kanalNaziv}: {decryptedMessage}");
                             }
                         }
                     }
