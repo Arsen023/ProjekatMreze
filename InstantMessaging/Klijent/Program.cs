@@ -233,7 +233,7 @@ namespace Klijent
                     IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000);
 
                     string datumVreme = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                    string porukaZaServer = $"[{datumVreme}]-[{izabraniServer}]:[{izabraniKanal}]:[{poruka}]-[{korisnickoIme}]";
+                    string porukaZaServer = $"[{datumVreme}] - Server: {izabraniServer} - Kanal: {izabraniKanal} - Poruka: {poruka} - Korisnik: {korisnickoIme}";
 
                     byte[] porukaBytes = Encoding.UTF8.GetBytes(porukaZaServer);
                     udpClient.Send(porukaBytes, porukaBytes.Length, serverEndPoint);

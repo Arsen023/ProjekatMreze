@@ -12,3 +12,10 @@ C:\Users\arsen\Source\Repos\ProjekatMreze\InstantMessaging\Klijent\obj\Debug\Kli
 C:\Users\arsen\Source\Repos\ProjekatMreze\InstantMessaging\Klijent\obj\Debug\Klijent.csproj.CoreCompileInputs.cache
 C:\Users\arsen\Source\Repos\ProjekatMreze\InstantMessaging\Klijent\obj\Debug\Klijent.exe
 C:\Users\arsen\Source\Repos\ProjekatMreze\InstantMessaging\Klijent\obj\Debug\Klijent.pdb
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Klijent\bin\Debug\Klijent.exe.config
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Klijent\bin\Debug\Klijent.exe
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Klijent\bin\Debug\Klijent.pdb
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Klijent\obj\Debug\Klijent.csproj.AssemblyReference.cache
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Klijent\obj\Debug\Klijent.csproj.CoreCompileInputs.cache
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Klijent\obj\Debug\Klijent.exe
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Klijent\obj\Debug\Klijent.pdb

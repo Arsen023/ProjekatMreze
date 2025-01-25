@@ -143,9 +143,9 @@ namespace Server
                     if (porukaTekst.StartsWith("PORUKA"))
                     {
                         string[] delovi = porukaTekst.Split(';');
-                        string serverNaziv = delovi[1];
-                        string kanalNaziv = delovi[2];
-                        string poruka2 = delovi[3];
+                        string serverNaziv = delovi[1].Replace("[", "").Replace("]", "");
+                        string kanalNaziv = delovi[2].Replace("[", "").Replace("]", "");
+                        string poruka2 = delovi[3].Replace("[", "").Replace("]", "");
 
                         if (serveri.ContainsKey(serverNaziv))
                         {
@@ -154,7 +154,7 @@ namespace Server
                             {
                                 kanal.DodajPoruku(poruka2);
                                 string datumVreme = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                                Console.WriteLine($"[{datumVreme}] - [{serverNaziv}]: [{kanalNaziv}]: [{poruka2}]");
+                                Console.WriteLine($"{datumVreme} - {serverNaziv}: {kanalNaziv}: {poruka2}");
 
                             }
                         }

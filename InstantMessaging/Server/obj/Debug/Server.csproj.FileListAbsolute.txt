@@ -12,3 +12,10 @@ C:\Users\arsen\Source\Repos\ProjekatMreze\InstantMessaging\Server\obj\Debug\Serv
 C:\Users\arsen\Source\Repos\ProjekatMreze\InstantMessaging\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
 C:\Users\arsen\Source\Repos\ProjekatMreze\InstantMessaging\Server\obj\Debug\Server.exe
 C:\Users\arsen\Source\Repos\ProjekatMreze\InstantMessaging\Server\obj\Debug\Server.pdb
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Server\bin\Debug\Server.exe.config
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Server\bin\Debug\Server.exe
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Server\bin\Debug\Server.pdb
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Server\obj\Debug\Server.csproj.AssemblyReference.cache
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Server\obj\Debug\Server.exe
+C:\Users\Luka\Source\Repos\ProjekatMreze\InstantMessaging\Server\obj\Debug\Server.pdb
