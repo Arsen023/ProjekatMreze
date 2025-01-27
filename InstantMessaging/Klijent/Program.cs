@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.IO;
 namespace Klijent
 {
     public class Program
@@ -252,6 +252,20 @@ namespace Klijent
             catch (Exception ex)
             {
                 Console.WriteLine($"Greška pri slanju poruke: {ex.Message}");
+            }
+        }
+
+        private static void SnimiStatusKorisnika(string korisnickoIme, string server, string kanal)
+        {
+            try
+            {
+                string vremePrestanak = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                string status = $"{korisnickoIme}|{server}|{kanal}|{vremePrestanak}";
+                File.WriteAllText("serveri.txt", status);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Greška pri snimanju statusa: {ex.Message}");
             }
         }
 

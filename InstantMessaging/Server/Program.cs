@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -19,6 +20,8 @@ namespace Server
         static void Main(string[] args)
         {
             Console.WriteLine("Pokretanje aplikacije za upravljanje serverima...");
+
+            UcitajServere();
             // Pokreni asinhronu metodu koja osluškuje UDP zahteve
             Task.Run(() => OsluskivanjeZahteva());
 
@@ -68,6 +71,34 @@ namespace Server
 
             serveri[nazivServera] = new List<Kanal>();
             Console.WriteLine($"Server '{nazivServera}' uspesno kreiran.");
+
+            // Čuvanje novog servera u tekstualnu datoteku
+            using (StreamWriter writer = new StreamWriter("serveri.txt", true))
+            {
+                writer.WriteLine(nazivServera);
+            }
+        }
+
+        static void UcitajServere()
+        {
+            try
+            {
+                using (StreamReader reader = new StreamReader("serveri.txt"))
+                {
+                    string serverName;
+                    while ((serverName = reader.ReadLine()) != null)
+                    {
+                        if (!serveri.ContainsKey(serverName))
+                        {
+                            serveri[serverName] = new List<Kanal>();  // Dodajemo server u memoriju
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Greška prilikom učitavanja servera: {ex.Message}");
+            }
         }
 
         static void DodajKanal()
@@ -152,6 +183,8 @@ namespace Server
 
                         // Kombinovanje korisničkog imena i kanala za ključnu reč
                         string key = korisnickoIme + kanalNaziv;
+
+
 
                         // Kreiranje Playfair objekta
                         Plejfer playfair = new Plejfer(key);

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Klijent
 {
@@ -61,6 +59,7 @@ namespace Klijent
         {
             StringBuilder result = new StringBuilder();
             text = text.ToUpper().Replace("J", "I"); // Zamenjujemo 'J' sa 'I'
+            text = text.Replace(" ", "_"); // Zamena razmaka simbolom '_'
             if (text.Length % 2 != 0)
             {
                 text += "X"; // Ako je broj karaktera neparan, dodajemo 'X'
@@ -70,6 +69,13 @@ namespace Klijent
             {
                 char firstChar = text[i];
                 char secondChar = text[i + 1];
+
+                // Ako znak nije u abecedi, preskoči ga
+                if (!charPositions.ContainsKey(firstChar) || !charPositions.ContainsKey(secondChar))
+                {
+                    result.Append(firstChar).Append(secondChar);
+                    continue;
+                }
 
                 var firstPos = charPositions[firstChar];
                 var secondPos = charPositions[secondChar];
@@ -108,6 +114,13 @@ namespace Klijent
                 char firstChar = text[i];
                 char secondChar = text[i + 1];
 
+                // Ako znak nije u abecedi, preskoči ga
+                if (!charPositions.ContainsKey(firstChar) || !charPositions.ContainsKey(secondChar))
+                {
+                    result.Append(firstChar).Append(secondChar);
+                    continue;
+                }
+
                 var firstPos = charPositions[firstChar];
                 var secondPos = charPositions[secondChar];
 
@@ -130,10 +143,10 @@ namespace Klijent
                     result.Append(matrix[secondPos.Item1, firstPos.Item2]);
                 }
             }
+            string decryptedText = result.ToString().Replace("_", " "); // Vraćanje razmaka
 
-            return result.ToString();
+            return decryptedText;
         }
     }
 
 }
-

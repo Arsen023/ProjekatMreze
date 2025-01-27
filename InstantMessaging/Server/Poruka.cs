@@ -18,7 +18,5 @@ namespace Server
             VremenskiTrenutak = vremenskiTrenutak;
             Sadrzaj = sadrzaj;
         }
-
-       
     }
 }
