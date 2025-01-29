@@ -10,12 +10,14 @@ namespace Server
     {
         public string NazivKanala { get; set; }
         public List<string> PorukaList { get; set; }
-        
+
+        public int NepocitanePoruke { get; set; } = 0;  // Broj nepročitanih poruka
 
         public Kanal(string naziv) 
         { 
             NazivKanala = naziv;
             PorukaList = new List<string>();
+            
         }
 
         //dodavanje poruke u kanal
@@ -23,7 +25,14 @@ namespace Server
         public void DodajPoruku(string poruka)
         {
             PorukaList.Add(poruka);
+            NepocitanePoruke++;
         }
+
+        public void OznaciKaoProcitano()
+        {
+            NepocitanePoruke = 0;  // Označite sve poruke kao pročitane
+        }
+
 
     }
 }

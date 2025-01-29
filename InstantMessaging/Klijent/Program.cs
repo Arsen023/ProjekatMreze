@@ -14,8 +14,8 @@ namespace Klijent
 
         public static void Main(string[] args)
         {
-            
-                
+
+
             Console.WriteLine("Dobrodošli u klijentsku aplikaciju!");
             while (true)
             {
@@ -38,6 +38,16 @@ namespace Klijent
                     continue;
 
                 Komunikacija(korisnickoIme);
+
+                // Pozivamo metodu kada klijent odluči da završi
+                Console.WriteLine("Da li želite da izadjete? (da/ne)");
+                string izlaz = Console.ReadLine();
+                if (izlaz.Equals("da", StringComparison.OrdinalIgnoreCase))
+                {
+                    ZabeleziVremeKadaKlijentPrestane(korisnickoIme, izabraniServer);
+                    Console.WriteLine("Zatvaranje aplikacije...");
+                    break;
+                }
             }
         }
 
@@ -255,19 +265,29 @@ namespace Klijent
             }
         }
 
-        private static void SnimiStatusKorisnika(string korisnickoIme, string server, string kanal)
+        private static void ZabeleziVremeKadaKlijentPrestane(string korisnickoIme, string server)
         {
             try
             {
-                string vremePrestanak = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                string status = $"{korisnickoIme}|{server}|{kanal}|{vremePrestanak}";
-                File.WriteAllText("serveri.txt", status);
+                string vremePrestanka = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                string fajlPutanja = "statusKlijenata.txt";
+
+                using (StreamWriter writer = new StreamWriter(fajlPutanja, true))
+                {
+                    writer.WriteLine($"{korisnickoIme} prestao sa radom na serveru {server} u {vremePrestanka}");
+                }
+
+                // Ispis na ekranu
+                Console.WriteLine($"Zabeleženo vreme prestanka rada za korisnika {korisnickoIme} na serveru {server} u {vremePrestanka}.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Greška pri snimanju statusa: {ex.Message}");
+                Console.WriteLine($"Greška pri beleženju vremena prestanka: {ex.Message}");
             }
         }
+
+        
+
 
         private static void PrimajPoruke()
         {
@@ -296,3 +316,10 @@ namespace Klijent
         }
     }
 }
+
+
+
+
+
+
+

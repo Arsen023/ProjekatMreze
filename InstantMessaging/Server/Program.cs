@@ -11,14 +11,17 @@ using System.Threading.Tasks;
 
 namespace Server
 {
+   
     public class Program
     {
         static Dictionary<string, List<Kanal>> serveri = new Dictionary<string, List<Kanal>>();
         static UdpClient udpServer = new UdpClient(5000);  // Globalni UDP server
         static List<Socket> activeSockets = new List<Socket>(); // TCP Sockets za povezivanje sa klijentima
-
+        
         static void Main(string[] args)
+          
         {
+            
             Console.WriteLine("Pokretanje aplikacije za upravljanje serverima...");
 
             UcitajServere();
@@ -184,8 +187,6 @@ namespace Server
                         // Kombinovanje korisničkog imena i kanala za ključnu reč
                         string key = korisnickoIme + kanalNaziv;
 
-
-
                         // Kreiranje Playfair objekta
                         Plejfer playfair = new Plejfer(key);
 
@@ -197,7 +198,7 @@ namespace Server
                             var kanal = serveri[serverNaziv].Find(k => k.NazivKanala == kanalNaziv);
                             if (kanal != null)
                             {
-                                kanal.DodajPoruku(decryptedMessage);
+                                kanal.DodajPoruku(decryptedMessage);  // Dodaj poruku i povećaj broj nepročitanih
                                 string datumVreme = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                                 Console.WriteLine($"{datumVreme} - {serverNaziv}: {kanalNaziv}: {decryptedMessage}");
                             }
@@ -218,7 +219,7 @@ namespace Server
                         if (serveri.ContainsKey(serverNaziv))
                         {
                             List<Kanal> kanali = serveri[serverNaziv];
-                            string listaKanala = string.Join(";", kanali.Select(k => k.NazivKanala));
+                            string listaKanala = string.Join(";", kanali.Select(k => $"{k.NazivKanala} ({k.NepocitanePoruke} nepročitanih poruka)"));
                             byte[] listaBytes = Encoding.UTF8.GetBytes(listaKanala);
                             udpServer.Send(listaBytes, listaBytes.Length, clientEndPoint);
                             Console.WriteLine($"Poslata lista kanala za server {serverNaziv}: {listaKanala}");
@@ -230,7 +231,7 @@ namespace Server
                             Console.WriteLine($"Klijent trazio kanale za nepostojeći server: {serverNaziv}");
                         }
                     }
-
+                
                 }
                 catch (Exception ex)
                 {
@@ -266,16 +267,27 @@ namespace Server
 
         static void HandleTcpClient(Socket tcpSocket)
         {
+            string serverNaziv = ""; // Inicijalizacija promenljive za server
+
             try
             {
                 byte[] buffer = new byte[1024];
                 int bytesRead;
+
+                // Čitanje podataka sa klijenta
                 while ((bytesRead = tcpSocket.Receive(buffer)) > 0)
                 {
                     string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                     Console.WriteLine($"Primljena TCP poruka: {message}");
 
-                    
+                    if (string.IsNullOrEmpty(serverNaziv))
+                    {
+                        serverNaziv = message;  // Prvi unos je serverNaziv
+                        Console.WriteLine($"Klijent se povezao na server: {serverNaziv}");
+                        continue; // Onda čitamo dalje poruke
+                    }
+
+                    // Dalja obrada komunikacije (poruka sa klijentom)
                 }
             }
             catch (Exception ex)
@@ -284,10 +296,25 @@ namespace Server
             }
             finally
             {
+                // Zabeleži vreme kada klijent prestane, koristeći serverNaziv
+                ZabeleziVremeKadaKlijentPrestane(tcpSocket, serverNaziv); // Pozivanje sa parametrom
                 tcpSocket.Close();
             }
         }
+        static void ZabeleziVremeKadaKlijentPrestane(Socket tcpSocket, string serverNaziv)
+        {
+            string clientEndPoint = tcpSocket.RemoteEndPoint.ToString();
+            string vremePrekida = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
+            // Čuvanje statusa klijenta i servera u fajlu
+            using (StreamWriter writer = new StreamWriter("serveri.txt", true))
+            {
+                writer.WriteLine($"{clientEndPoint} | {serverNaziv} | {vremePrekida}");
+            }
+        }
+
+
+        
         static void ZatvoriServer()
         {
             Console.WriteLine("Zatvaranje servera...");
