@@ -151,16 +151,24 @@ namespace Klijent
         {
             try
             {
-                using (UdpClient udpClient = new UdpClient())
+                // Kreiraj UDP socket
+                using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
                 {
                     IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000);
+                    EndPoint remoteEP = (EndPoint)serverEndPoint;
 
+                    // Pripremi poruku za slanje
                     string poruka = "PRIJAVA " + korisnickoIme;
                     byte[] porukaBytes = Encoding.UTF8.GetBytes(poruka);
-                    udpClient.Send(porukaBytes, porukaBytes.Length, serverEndPoint);
 
-                    byte[] odgovorBytes = udpClient.Receive(ref serverEndPoint);
-                    string odgovor = Encoding.UTF8.GetString(odgovorBytes);
+                    // Pošalji poruku serveru
+                    socket.SendTo(porukaBytes, remoteEP);
+
+                    // Primi odgovor sa servera
+                    byte[] odgovorBytes = new byte[1024];
+                    int brojPrimljenihBajtova = socket.ReceiveFrom(odgovorBytes, ref remoteEP);
+
+                    string odgovor = Encoding.UTF8.GetString(odgovorBytes, 0, brojPrimljenihBajtova);
                     Console.WriteLine("Server odgovorio: " + odgovor);
                 }
             }
@@ -175,18 +183,22 @@ namespace Klijent
             List<string> serveri = new List<string>();
             try
             {
-                using (UdpClient udpClient = new UdpClient())
+                using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
                 {
                     IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000);
+                    EndPoint remoteEP = (EndPoint)serverEndPoint;
 
                     string poruka = "LISTA_SERVERA";
                     byte[] porukaBytes = Encoding.UTF8.GetBytes(poruka);
-                    udpClient.Send(porukaBytes, porukaBytes.Length, serverEndPoint);
 
-                    IPEndPoint remoteEndPoint = null;
-                    byte[] odgovorBytes = udpClient.Receive(ref remoteEndPoint);
-                    string odgovor = Encoding.UTF8.GetString(odgovorBytes);
+                    // Pošalji zahtev
+                    socket.SendTo(porukaBytes, remoteEP);
 
+                    // Primi odgovor
+                    byte[] odgovorBytes = new byte[1024];
+                    int brojPrimljenihBajtova = socket.ReceiveFrom(odgovorBytes, ref remoteEP);
+
+                    string odgovor = Encoding.UTF8.GetString(odgovorBytes, 0, brojPrimljenihBajtova);
                     serveri.AddRange(odgovor.Split(';'));
                 }
             }
@@ -204,17 +216,22 @@ namespace Klijent
 
             try
             {
-                using (UdpClient udpClient = new UdpClient())
+                using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
                 {
                     IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000);
+                    EndPoint remoteEP = (EndPoint)serverEndPoint;
 
                     string poruka = $"LISTA_KANALA;{server}";
                     byte[] porukaBytes = Encoding.UTF8.GetBytes(poruka);
-                    udpClient.Send(porukaBytes, porukaBytes.Length, serverEndPoint);
 
-                    IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                    byte[] odgovorBytes = udpClient.Receive(ref remoteEndPoint);
-                    string odgovor = Encoding.UTF8.GetString(odgovorBytes);
+                    // Pošalji poruku serveru
+                    socket.SendTo(porukaBytes, remoteEP);
+
+                    // Primi odgovor od servera
+                    byte[] odgovorBytes = new byte[1024];
+                    int brojPrimljenihBajtova = socket.ReceiveFrom(odgovorBytes, ref remoteEP);
+
+                    string odgovor = Encoding.UTF8.GetString(odgovorBytes, 0, brojPrimljenihBajtova);
 
                     if (!odgovor.StartsWith("GRESKA"))
                     {
@@ -247,15 +264,17 @@ namespace Klijent
                 // Šifrovanje poruke
                 string encryptedMessage = playfair.Encrypt(poruka);
 
-                using (UdpClient udpClient = new UdpClient())
+                using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
                 {
                     IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000);
+                    EndPoint remoteEP = (EndPoint)serverEndPoint;
 
                     string datumVreme = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                     string porukaZaServer = $"[{datumVreme}] - Server: {izabraniServer} - Kanal: {izabraniKanal} - Poruka: {encryptedMessage} - Korisnik: {korisnickoIme}";
 
                     byte[] porukaBytes = Encoding.UTF8.GetBytes(porukaZaServer);
-                    udpClient.Send(porukaBytes, porukaBytes.Length, serverEndPoint);
+
+                    socket.SendTo(porukaBytes, remoteEP);
                     Console.WriteLine("Poruka poslata.");
                 }
             }
@@ -286,7 +305,7 @@ namespace Klijent
             }
         }
 
-        
+
 
 
         private static void PrimajPoruke()
@@ -295,17 +314,20 @@ namespace Klijent
             {
                 int lokalniPort = 5000 + new Random().Next(1, 1000);
 
-                using (UdpClient udpClient = new UdpClient())
+                using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
                 {
-                    udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, lokalniPort));
+                    // Bindowanje na nasumični port
+                    socket.Bind(new IPEndPoint(IPAddress.Any, lokalniPort));
+                    Console.WriteLine($"Socket sluša na portu: {lokalniPort}");
 
-                    IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000);
+                    EndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
 
                     while (true)
                     {
-                        byte[] odgovorBytes = udpClient.Receive(ref serverEndPoint);
-                        string odgovor = Encoding.UTF8.GetString(odgovorBytes);
-                        Console.WriteLine("Poruka sa servera: " + odgovor);
+                        byte[] buffer = new byte[1024];
+                        int primljenoBajtova = socket.ReceiveFrom(buffer, ref remoteEP);
+                        string poruka = Encoding.UTF8.GetString(buffer, 0, primljenoBajtova);
+                        Console.WriteLine("Poruka sa servera: " + poruka);
                     }
                 }
             }

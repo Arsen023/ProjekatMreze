@@ -15,7 +15,8 @@ namespace Server
     public class Program
     {
         static Dictionary<string, List<Kanal>> serveri = new Dictionary<string, List<Kanal>>();
-        static UdpClient udpServer = new UdpClient(5000);  // Globalni UDP server
+        
+        static Socket udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         static List<Socket> activeSockets = new List<Socket>(); // TCP Sockets za povezivanje sa klijentima
         
         static void Main(string[] args)
@@ -148,49 +149,47 @@ namespace Server
 
         static void OsluskivanjeZahteva()
         {
-            IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 5000);
+            IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Any, 5000);
+            udpSocket.Bind(serverEndPoint);  // obavezno bind za primanje
+
+            byte[] buffer = new byte[1024];
+
+            EndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
             while (true)
             {
                 try
                 {
-                    byte[] poruka = udpServer.Receive(ref clientEndPoint);
-                    string porukaTekst = Encoding.UTF8.GetString(poruka);
+                    int receivedLength = udpSocket.ReceiveFrom(buffer, ref clientEndPoint);
+                    string porukaTekst = Encoding.UTF8.GetString(buffer, 0, receivedLength);
                     Console.WriteLine($"Primljena poruka: {porukaTekst}");
 
                     if (porukaTekst == "LISTA_SERVERA")
                     {
                         string listaServera = string.Join(";", serveri.Keys);
                         byte[] listaBytes = Encoding.UTF8.GetBytes(listaServera);
-                        udpServer.Send(listaBytes, listaBytes.Length, clientEndPoint);
+                        udpSocket.SendTo(listaBytes, clientEndPoint);
                         Console.WriteLine("Poslata lista servera.");
                     }
 
-                    if (porukaTekst.StartsWith("PRIJAVA"))
+                    else if (porukaTekst.StartsWith("PRIJAVA"))
                     {
-                        string tcpInfo = $"{clientEndPoint.Address.ToString()}:6000";
+                        string tcpInfo = $"{((IPEndPoint)clientEndPoint).Address}:6000";
                         byte[] tcpInfoBytes = Encoding.UTF8.GetBytes(tcpInfo);
-                        udpServer.Send(tcpInfoBytes, tcpInfoBytes.Length, clientEndPoint);
+                        udpSocket.SendTo(tcpInfoBytes, clientEndPoint);
                         Console.WriteLine($"Poslata TCP informacija za prijavu: {tcpInfo}");
                     }
 
-                    // Provera za slanje poruka na kanal
-                    if (porukaTekst.StartsWith("PORUKA"))
+                    else if (porukaTekst.StartsWith("PORUKA"))
                     {
                         string[] delovi = porukaTekst.Split(';');
                         string serverNaziv = delovi[1].Replace("[", "").Replace("]", "");
                         string kanalNaziv = delovi[2].Replace("[", "").Replace("]", "");
                         string poruka2 = delovi[3].Replace("[", "").Replace("]", "");
-
                         string korisnickoIme = delovi[0].Replace("[", "").Replace("]", "");
 
-                        // Kombinovanje korisničkog imena i kanala za ključnu reč
                         string key = korisnickoIme + kanalNaziv;
-
-                        // Kreiranje Playfair objekta
                         Plejfer playfair = new Plejfer(key);
-
-                        // Dešifrovanje poruke
                         string decryptedMessage = playfair.Decrypt(poruka2);
 
                         if (serveri.ContainsKey(serverNaziv))
@@ -198,14 +197,14 @@ namespace Server
                             var kanal = serveri[serverNaziv].Find(k => k.NazivKanala == kanalNaziv);
                             if (kanal != null)
                             {
-                                kanal.DodajPoruku(decryptedMessage);  // Dodaj poruku i povećaj broj nepročitanih
+                                kanal.DodajPoruku(decryptedMessage);
                                 string datumVreme = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                                 Console.WriteLine($"{datumVreme} - {serverNaziv}: {kanalNaziv}: {decryptedMessage}");
                             }
                         }
                     }
 
-                    if (porukaTekst.StartsWith("LISTA_KANALA"))
+                    else if (porukaTekst.StartsWith("LISTA_KANALA"))
                     {
                         string[] delovi = porukaTekst.Split(';');
                         if (delovi.Length < 2)
@@ -221,17 +220,16 @@ namespace Server
                             List<Kanal> kanali = serveri[serverNaziv];
                             string listaKanala = string.Join(";", kanali.Select(k => $"{k.NazivKanala} ({k.NepocitanePoruke} nepročitanih poruka)"));
                             byte[] listaBytes = Encoding.UTF8.GetBytes(listaKanala);
-                            udpServer.Send(listaBytes, listaBytes.Length, clientEndPoint);
+                            udpSocket.SendTo(listaBytes, clientEndPoint);
                             Console.WriteLine($"Poslata lista kanala za server {serverNaziv}: {listaKanala}");
                         }
                         else
                         {
                             byte[] errorBytes = Encoding.UTF8.GetBytes("GRESKA: Server ne postoji.");
-                            udpServer.Send(errorBytes, errorBytes.Length, clientEndPoint);
+                            udpSocket.SendTo(errorBytes, clientEndPoint);
                             Console.WriteLine($"Klijent trazio kanale za nepostojeći server: {serverNaziv}");
                         }
                     }
-                
                 }
                 catch (Exception ex)
                 {
@@ -239,23 +237,26 @@ namespace Server
                 }
             }
         }
-
         static void OsluskivanjeTCPKlijenata()
         {
-            // TCP Server koji prihvata klijente
-            TcpListener tcpListener = new TcpListener(IPAddress.Any, 6000);
-            tcpListener.Start();
+            // Kreiranje TCP socket servera
+            Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, 6000);
+            serverSocket.Bind(endPoint);
+            serverSocket.Listen(10);  // Dozvoljava do 10 klijenata u redu čekanja
+
             Console.WriteLine("TCP server osluškuje na portu 6000...");
 
             while (true)
             {
                 try
                 {
-                    Socket tcpSocket = tcpListener.AcceptSocket();
+                    // Prihvatanje novog klijenta
+                    Socket tcpSocket = serverSocket.Accept();
                     activeSockets.Add(tcpSocket);
                     Console.WriteLine($"Nov klijent se povezao preko TCP: {tcpSocket.RemoteEndPoint}");
 
-                    // Za svakog klijenta pokreni zasebnu nit za obradu komunikacije
+                    // Pokretanje posebnog zadatka za obradu komunikacije sa klijentom
                     Task.Run(() => HandleTcpClient(tcpSocket));
                 }
                 catch (Exception ex)
@@ -318,7 +319,7 @@ namespace Server
         static void ZatvoriServer()
         {
             Console.WriteLine("Zatvaranje servera...");
-            udpServer.Close();
+            udpSocket.Close();
             Console.WriteLine("Server je zatvoren.");
         }
     }
