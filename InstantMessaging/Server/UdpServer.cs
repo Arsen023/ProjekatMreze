@@ -16,7 +16,7 @@ namespace Server
         {
             Task.Run(() =>
             {
-                // Kreiramo UDP socket
+                
                 Socket udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 udpSocket.Bind(new IPEndPoint(IPAddress.Any, 5000));
 
@@ -29,13 +29,13 @@ namespace Server
                 {
                     try
                     {
-                        // Primi podatke
+                        
                         int receivedLength = udpSocket.ReceiveFrom(buffer, ref remoteEndPoint);
                         string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedLength);
 
                         if (receivedMessage == "ZahtevZaServere")
                         {
-                            // Pošalji listu servera nazad klijentu
+                            
                             PosaljiListuServera(udpSocket, remoteEndPoint);
                         }
                     }

@@ -14,7 +14,7 @@ namespace Klijent
             GenerateMatrix(key);
         }
 
-        // Generiše Plejfer matricu na osnovu ključne reči
+        
         private void GenerateMatrix(string key)
         {
             key = key.ToUpper().Replace("J", "I"); // Zamenjujemo 'J' sa 'I'
@@ -54,7 +54,7 @@ namespace Klijent
             }
         }
 
-        // Funkcija za šifrovanje poruke
+        
         public string Encrypt(string text)
         {
             StringBuilder result = new StringBuilder();
@@ -103,7 +103,7 @@ namespace Klijent
             return result.ToString();
         }
 
-        // Funkcija za dešifrovanje poruke
+        
         public string Decrypt(string text)
         {
             StringBuilder result = new StringBuilder();
@@ -143,7 +143,7 @@ namespace Klijent
                     result.Append(matrix[secondPos.Item1, firstPos.Item2]);
                 }
             }
-            string decryptedText = result.ToString().Replace("_", " "); // Vraćanje razmaka
+            string decryptedText = result.ToString().Replace("_", " "); 
 
             return decryptedText;
         }

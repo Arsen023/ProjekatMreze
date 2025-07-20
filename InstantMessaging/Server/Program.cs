@@ -17,7 +17,7 @@ namespace Server
         static Dictionary<string, List<Kanal>> serveri = new Dictionary<string, List<Kanal>>();
         
         static Socket udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        static List<Socket> activeSockets = new List<Socket>(); // TCP Sockets za povezivanje sa klijentima
+        static List<Socket> activeSockets = new List<Socket>(); 
         
         static void Main(string[] args)
           
@@ -26,10 +26,10 @@ namespace Server
             Console.WriteLine("Pokretanje aplikacije za upravljanje serverima...");
 
             UcitajServere();
-            // Pokreni asinhronu metodu koja osluškuje UDP zahteve
+            
             Task.Run(() => OsluskivanjeZahteva());
 
-            // Pokreni TCP server za povezivanje sa klijentima
+          
             Task.Run(() => OsluskivanjeTCPKlijenata());
 
             while (true)
@@ -76,7 +76,7 @@ namespace Server
             serveri[nazivServera] = new List<Kanal>();
             Console.WriteLine($"Server '{nazivServera}' uspesno kreiran.");
 
-            // Čuvanje novog servera u tekstualnu datoteku
+            
             using (StreamWriter writer = new StreamWriter("serveri.txt", true))
             {
                 writer.WriteLine(nazivServera);
@@ -94,7 +94,7 @@ namespace Server
                     {
                         if (!serveri.ContainsKey(serverName))
                         {
-                            serveri[serverName] = new List<Kanal>();  // Dodajemo server u memoriju
+                            serveri[serverName] = new List<Kanal>();  
                         }
                     }
                 }
@@ -239,7 +239,7 @@ namespace Server
         }
         static void OsluskivanjeTCPKlijenata()
         {
-            // Kreiranje TCP socket servera
+            
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, 6000);
             serverSocket.Bind(endPoint);

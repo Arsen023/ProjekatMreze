@@ -39,7 +39,7 @@ namespace Klijent
 
                 Komunikacija(korisnickoIme);
 
-                // Pozivamo metodu kada klijent odluči da završi
+                
                 Console.WriteLine("Da li želite da izadjete? (da/ne)");
                 string izlaz = Console.ReadLine();
                 if (izlaz.Equals("da", StringComparison.OrdinalIgnoreCase))
@@ -255,13 +255,13 @@ namespace Klijent
         {
             try
             {
-                // Kombinovanje korisničkog imena i kanala za ključnu reč
+                
                 string key = korisnickoIme + izabraniKanal;
 
-                // Kreiranje Playfair objekta
+                
                 Plejfer playfair = new Plejfer(key);
 
-                // Šifrovanje poruke
+                
                 string encryptedMessage = playfair.Encrypt(poruka);
 
                 using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
@@ -296,7 +296,7 @@ namespace Klijent
                     writer.WriteLine($"{korisnickoIme} prestao sa radom na serveru {server} u {vremePrestanka}");
                 }
 
-                // Ispis na ekranu
+                
                 Console.WriteLine($"Zabeleženo vreme prestanka rada za korisnika {korisnickoIme} na serveru {server} u {vremePrestanka}.");
             }
             catch (Exception ex)
@@ -316,7 +316,7 @@ namespace Klijent
 
                 using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
                 {
-                    // Bindowanje na nasumični port
+                    
                     socket.Bind(new IPEndPoint(IPAddress.Any, lokalniPort));
                     Console.WriteLine($"Socket sluša na portu: {lokalniPort}");
 

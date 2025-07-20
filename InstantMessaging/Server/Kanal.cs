@@ -11,7 +11,7 @@ namespace Server
         public string NazivKanala { get; set; }
         public List<string> PorukaList { get; set; }
 
-        public int NepocitanePoruke { get; set; } = 0;  // Broj nepročitanih poruka
+        public int NepocitanePoruke { get; set; } = 0;  
 
         public Kanal(string naziv) 
         { 
@@ -20,7 +20,7 @@ namespace Server
             
         }
 
-        //dodavanje poruke u kanal
+        
 
         public void DodajPoruku(string poruka)
         {
@@ -30,7 +30,7 @@ namespace Server
 
         public void OznaciKaoProcitano()
         {
-            NepocitanePoruke = 0;  // Označite sve poruke kao pročitane
+            NepocitanePoruke = 0; 
         }
 
 
