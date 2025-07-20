@@ -56,7 +56,7 @@ namespace Server
                     return;
                 }
 
-                // Spremi listu servera u string
+                
                 StringBuilder listaServera = new StringBuilder();
                 foreach (var server in serveri)
                 {

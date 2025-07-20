@@ -37,7 +37,7 @@ namespace Server
                 Console.WriteLine("\nOpcije: ");
                 Console.WriteLine("1 - Kreiraj novi server");
                 Console.WriteLine("2 - Dodaj kanal na postojeci server");
-                Console.WriteLine("3 - Prikazi stanje servera");
+                Console.WriteLine("3 - Prikazi listu servera");
                 Console.WriteLine("0 - Zatvori server");
                 string izbor = Console.ReadLine();
 
@@ -251,12 +251,12 @@ namespace Server
             {
                 try
                 {
-                    // Prihvatanje novog klijenta
+                    
                     Socket tcpSocket = serverSocket.Accept();
                     activeSockets.Add(tcpSocket);
                     Console.WriteLine($"Nov klijent se povezao preko TCP: {tcpSocket.RemoteEndPoint}");
 
-                    // Pokretanje posebnog zadatka za obradu komunikacije sa klijentom
+                    
                     Task.Run(() => HandleTcpClient(tcpSocket));
                 }
                 catch (Exception ex)
@@ -268,14 +268,14 @@ namespace Server
 
         static void HandleTcpClient(Socket tcpSocket)
         {
-            string serverNaziv = ""; // Inicijalizacija promenljive za server
+            string serverNaziv = ""; 
 
             try
             {
                 byte[] buffer = new byte[1024];
                 int bytesRead;
 
-                // Čitanje podataka sa klijenta
+                
                 while ((bytesRead = tcpSocket.Receive(buffer)) > 0)
                 {
                     string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
@@ -283,12 +283,12 @@ namespace Server
 
                     if (string.IsNullOrEmpty(serverNaziv))
                     {
-                        serverNaziv = message;  // Prvi unos je serverNaziv
+                        serverNaziv = message;  
                         Console.WriteLine($"Klijent se povezao na server: {serverNaziv}");
-                        continue; // Onda čitamo dalje poruke
+                        continue; 
                     }
 
-                    // Dalja obrada komunikacije (poruka sa klijentom)
+                    
                 }
             }
             catch (Exception ex)
@@ -297,8 +297,8 @@ namespace Server
             }
             finally
             {
-                // Zabeleži vreme kada klijent prestane, koristeći serverNaziv
-                ZabeleziVremeKadaKlijentPrestane(tcpSocket, serverNaziv); // Pozivanje sa parametrom
+                
+                ZabeleziVremeKadaKlijentPrestane(tcpSocket, serverNaziv); 
                 tcpSocket.Close();
             }
         }
@@ -307,7 +307,7 @@ namespace Server
             string clientEndPoint = tcpSocket.RemoteEndPoint.ToString();
             string vremePrekida = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-            // Čuvanje statusa klijenta i servera u fajlu
+           
             using (StreamWriter writer = new StreamWriter("serveri.txt", true))
             {
                 writer.WriteLine($"{clientEndPoint} | {serverNaziv} | {vremePrekida}");

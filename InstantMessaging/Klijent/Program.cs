@@ -151,20 +151,20 @@ namespace Klijent
         {
             try
             {
-                // Kreiraj UDP socket
+                
                 using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
                 {
                     IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, 5000);
                     EndPoint remoteEP = (EndPoint)serverEndPoint;
 
-                    // Pripremi poruku za slanje
+                    
                     string poruka = "PRIJAVA " + korisnickoIme;
                     byte[] porukaBytes = Encoding.UTF8.GetBytes(poruka);
 
-                    // Pošalji poruku serveru
+                    
                     socket.SendTo(porukaBytes, remoteEP);
 
-                    // Primi odgovor sa servera
+                    
                     byte[] odgovorBytes = new byte[1024];
                     int brojPrimljenihBajtova = socket.ReceiveFrom(odgovorBytes, ref remoteEP);
 
@@ -191,10 +191,10 @@ namespace Klijent
                     string poruka = "LISTA_SERVERA";
                     byte[] porukaBytes = Encoding.UTF8.GetBytes(poruka);
 
-                    // Pošalji zahtev
+                    
                     socket.SendTo(porukaBytes, remoteEP);
 
-                    // Primi odgovor
+                    
                     byte[] odgovorBytes = new byte[1024];
                     int brojPrimljenihBajtova = socket.ReceiveFrom(odgovorBytes, ref remoteEP);
 
@@ -224,10 +224,10 @@ namespace Klijent
                     string poruka = $"LISTA_KANALA;{server}";
                     byte[] porukaBytes = Encoding.UTF8.GetBytes(poruka);
 
-                    // Pošalji poruku serveru
+                    
                     socket.SendTo(porukaBytes, remoteEP);
 
-                    // Primi odgovor od servera
+                   
                     byte[] odgovorBytes = new byte[1024];
                     int brojPrimljenihBajtova = socket.ReceiveFrom(odgovorBytes, ref remoteEP);
 
